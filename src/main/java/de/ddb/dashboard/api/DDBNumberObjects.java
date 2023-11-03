@@ -25,6 +25,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,6 +52,7 @@ public class DDBNumberObjects {
 
     @GetMapping
     @RequestMapping("ddb-number-objects")
+    @Cacheable("ddb-number-objects")
     public Integer restApiCall() throws IOException {
 
         final Request request = new Request.Builder()
@@ -63,5 +67,10 @@ public class DDBNumberObjects {
                 .read("$.response.numFound");
 
         return numFound;
+    }
+
+    @CacheEvict(value = "ddb-number-objects", allEntries = true)
+    @Scheduled(fixedRateString = "${ddbstatistics.cachettl}")
+    public void emptyCache() {
     }
 }

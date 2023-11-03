@@ -28,6 +28,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,6 +52,7 @@ public class DZPListTitles {
 
     @GetMapping
     @RequestMapping("dzp-list-titles")
+    @Cacheable("dzp-list-titles")
     public List<Map<String, String>> restApiCall() throws IOException {
 
         final Request request = new Request.Builder()
@@ -89,4 +93,10 @@ public class DZPListTitles {
         sb.delete(sb.length() - separator.length(), sb.length());
         return sb.toString();
     }
+
+    @CacheEvict(value = "dzp-list-titles", allEntries = true)
+    @Scheduled(fixedRateString = "${ddbstatistics.cachettl}")
+    public void emptyCache() {
+    }
+
 }

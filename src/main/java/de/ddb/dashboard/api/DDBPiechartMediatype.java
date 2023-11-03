@@ -27,6 +27,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,7 +67,8 @@ public class DDBPiechartMediatype {
 
     @GetMapping
     @RequestMapping("ddb-piechart-mediatype")
-    public Map<String, Integer> restApi() throws IOException {
+    @Cacheable("ddb-piechart-mediatype")
+    public Map<String, Integer> restApiCall() throws IOException {
 
         final Request request = new Request.Builder()
                 .url(API + apiKey)
@@ -86,6 +90,10 @@ public class DDBPiechartMediatype {
         }
 
         return data;
+    }
 
+    @CacheEvict(value = "ddb-piechart-mediatype", allEntries = true)
+    @Scheduled(fixedRateString = "${ddbstatistics.cachettl}")
+    public void emptyCache() {
     }
 }

@@ -35,6 +35,9 @@ import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -88,6 +91,7 @@ public class DDBListIngests {
 
     @GetMapping
     @RequestMapping("ddb-list-ingests")
+    @Cacheable("ddb-list-ingests")
     public List<Map<String, Object>> restApiCall(@RequestParam("cw") Optional<String> cw) throws IOException {
 
         YearWeek yw = null;
@@ -193,5 +197,10 @@ public class DDBListIngests {
             desiredDate = desiredDate.plusDays(1L);
         }
         return sb.toString();
+    }
+
+    @CacheEvict(value = "ddb-list-ingests", allEntries = true)
+    @Scheduled(fixedRateString = "${ddbstatistics.cachettl}")
+    public void emptyCache() {
     }
 }

@@ -27,6 +27,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,7 +65,8 @@ public class DDBPiechartSectorDigitalisat {
 
     @GetMapping
     @RequestMapping("ddb-piechart-sector-digitalisat")
-    public Map<String, Integer> restApi() throws IOException {
+    @Cacheable("ddb-piechart-sector-digitalisat")
+    public Map<String, Integer> restApiCall() throws IOException {
 
         final Request request = new Request.Builder()
                 .url(API + apiKey)
@@ -84,6 +88,10 @@ public class DDBPiechartSectorDigitalisat {
         }
 
         return data;
+    }
 
+    @CacheEvict(value = "ddb-piechart-sector-digitalisat", allEntries = true)
+    @Scheduled(fixedRateString = "${ddbstatistics.cachettl}")
+    public void emptyCache() {
     }
 }

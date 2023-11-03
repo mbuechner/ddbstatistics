@@ -9,7 +9,7 @@ $(document).ready(function () {
     if (link.indexOf('-') > -1) {
         abschnitt = link.substring(0, link.indexOf('-'));
         $('#' + abschnitt + '-abschnitt').addClass("show");
-    } else if (link === 'index.html') {
+    } else if (link === '' || link === 'index.html') {
         $('#ddb-abschnitt').addClass("show");
     }
 });
