@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="utf-8">
+        <meta content="IE=edge" http-equiv="X-UA-Compatible">
+        <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+        <meta content="" name="description">
+        <meta content="Michael Büchner" name="author">
+        <title>DDBstatistics</title>
+        <!-- Custom fonts for this template-->
+        <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+        <!-- Custom styles for this template-->
+        <link href="css/sb-admin-2.min.css" rel="stylesheet">
+        <!-- Custom styles for this page -->
+        <link href="vendor/datatables/datatables.min.css" rel="stylesheet">
+    </head>
+    <body id="page-top">
+        <!-- Page Wrapper -->
+        <div id="wrapper">
+            <div th:replace="~{fragments/sidebar.html}"></div>
+            <!-- Content Wrapper -->
+            <div class="d-flex flex-column" id="content-wrapper">
+                <!-- Main Content -->
+                <div id="content">
+                    <!-- Topbar -->
+                    <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                        <!-- Sidebar Toggle (Topbar) -->
+                        <button class="btn btn-link d-md-none rounded-circle mr-3" id="sidebarToggleTop">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                    </nav>
+                    <!-- End of Topbar -->
+                    <!-- Begin Page Content -->
+                    <!-- Begin Page Content -->
+                    <div class="container-fluid">
+                        <!-- Page Heading -->
+                        <h1 class="h3 mb-2 text-gray-800">Zeitungstitel mit NS-Disclaimer</h1>
+                        <p class="mb-4">Zeitungstitel, die (teilweise) einen NS-Disclaimer haben.</p>
+                        <!-- DataTales Example -->
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                                <ul class="nav nav-tabs card-header-tabs" data-bs-tabs="tabs">
+                                    <li class="nav-item">
+                                        <a class="nav-link" aria-current="true" data-bs-toggle="tab" href="dzp-title.html">Alle</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link active" data-bs-toggle="tab" href="dzp-title-ns.html">NS-Disclaimer</a>
+                                    </li>
+                                </ul>
+                                <div class="dropdown no-arrow">
+                                    <a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" id="exportLinks" role="button">
+                                        <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                                    </a>
+                                    <div aria-labelledby="exportLinks" class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                                        <div class="dropdown-header">Aktionen</div>
+                                        <button class="dropdown-item" id="exportLink-copy">Kopieren</button>
+                                        <button class="dropdown-item" id="exportLink-print">Drucken</button>
+                                        <button class="dropdown-item" id="exportLink-excel">Excel</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <i class="fas fa-circle-notch fa-spin" id="spinner"></i>
+                                    <table class="table table-bordered d-none" id="dzp-list-titles-ns" width="100%"></table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.container-fluid -->
+                </div>
+                <!-- End of Main Content -->
+                <div th:replace="~{fragments/footer.html}"></div>
+            </div>
+            <!-- End of Content Wrapper -->
+        </div>
+        <!-- End of Page Wrapper -->
+        <!-- Scroll to Top Button-->
+        <a class="scroll-to-top rounded" href="#page-top">
+            <i class="fas fa-angle-up"></i>
+        </a>
+        <!-- Bootstrap core JavaScript-->
+        <script src="vendor/jquery/jquery.min.js"></script>
+        <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <!-- Core plugin JavaScript-->
+        <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+        <!-- Custom scripts for all pages-->
+        <script src="js/sb-admin-2.min.js"></script>
+        <!-- Page level plugins -->
+        <script src="vendor/datatables/datatables.min.js"></script>
+        <!-- Page level custom scripts -->
+        <script src="js/ddb-menu.js"></script>
+        <script>
+            $(document).ready(function () {
+                $.getJSON("api/dzp-list-titles-ns",
+                        function (data) {
+                            $('#spinner').addClass('d-none');
+                            $('#dzp-list-titles-ns').removeClass('d-none');
+                            $("#dzp-list-titles-ns").DataTable({
+                                "dom": 'B<"row mb-3"<"col-12 col-md-6 pb-2"l><"col-12 col-md-6 pb-2"f>>rt<"row mb-3"<"col-12 col-md-6 pb-2"i><"col-12 col-md-6 pb-2"p>>',
+                                "buttons": ['copy', 'print', 'excel'],
+                                "processing": true,
+                                "pageLength": 10,
+                                "fixedHeader": true,
+                                "lengthMenu": [Array(10, 100, 500, 1000, 5000, -1), Array(10, 100, 500, 1000, 5000, "Alle")],
+                                "language": {
+                                    url: "vendor/datatables/de-DE.json",
+                                    // decimal: ","
+                                },
+                                "data": data,
+                                "columns": [{
+                                        "data": "id",
+                                        "title": "ZDB-ID",
+                                        "render": function (data, type, row, meta) {
+                                            if (type === 'display') {
+                                                data = '<a href="https://www.deutsche-digitale-bibliothek.de/newspaper/' + data + '" target="_blank">' + data + '</a>';
+                                            }
+                                            return data;
+                                        }
+                                    }, {
+                                        "data": "title",
+                                        "title": "Zeitungstitel"
+                                    }],
+                                "columnDefs": [{
+                                        "width": "20%",
+                                        "targets": 0
+                                    }, {
+                                        "width": "80%",
+                                        "targets": 1
+                                    }],
+                                initComplete: function () {
+                                    $('.dt-buttons').addClass('d-none');
+                                    $('#exportLink-copy').click(function () {
+                                        $('.buttons-copy').click();
+                                    });
+                                    $('#exportLink-print').click(function () {
+                                        $('.buttons-print').click();
+                                    });
+                                    $('#exportLink-excel').click(function () {
+                                        $('.buttons-excel').click();
+                                    });
+                                }
+                            });
+                        });
+            });</script>
+    </body>
+</html>
