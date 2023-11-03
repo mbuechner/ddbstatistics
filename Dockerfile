@@ -9,7 +9,7 @@ ENV TZ=Europe/Berlin
 ENV DDBSTATISTICS.PORT=8080
 RUN apt-get -y update && apt-get -y install openjdk-17-jre && mkdir /home/ddbstatistics
 COPY --from=MAVEN_CHAIN /tmp/target/ddbstatistics.jar /home/ddbstatistics/ddbstatistics.jar
-WORKDIR /home/ddbid/
+WORKDIR /home/ddbstatistics/
 CMD ["java", "-jar", "ddbstatistics.jar"]
 
 EXPOSE 8080
