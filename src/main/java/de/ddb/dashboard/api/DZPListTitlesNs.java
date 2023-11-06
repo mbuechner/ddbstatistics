@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -44,8 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class DZPListTitlesNs {
 
-    @Getter
-    private final static String API = "https://api.deutsche-digitale-bibliothek.de/search/index/newspaper-issues/select?q=type:issue%20AND%20ns_disclaimer_required:true&rows=-1&fl=paper_title&group=true&group.field=zdb_id&group.limit=1";
+    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue%20AND%20ns_disclaimer_required:true&rows=-1&fl=paper_title&group=true&group.field=zdb_id&group.limit=1";
 
     @Autowired
     private OkHttpClient httpClient;

@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 import okhttp3.Call;
@@ -34,7 +33,6 @@ import okhttp3.Request;
 import okhttp3.Response;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -53,11 +51,7 @@ import org.threeten.extra.YearWeek;
 @Slf4j
 public class DDBListIngests {
 
-    @Getter
-    private final static String API = "https://api.deutsche-digitale-bibliothek.de/search/index/search/select?q=last_update:{{DATES}}&group=true&group.field=ingest_id&group.limit=1&fl=dataset_label,provider_fct,md_format,type_fct,sector_fct&oauth_consumer_key=";
-
-    @Value("${ddbstatistics.apikey}")
-    private String apiKey;
+    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/search/select?q=last_update:{{DATES}}&group=true&group.field=ingest_id&group.limit=1&fl=dataset_label,provider_fct,md_format,type_fct,sector_fct";
 
     private final static Map<String, String> MEDIATYPE = new HashMap<>() {
         {
@@ -103,7 +97,7 @@ public class DDBListIngests {
         }
 
         final Request request = new Request.Builder()
-                .url(API.replace("{{DATES}}", getSearchString(yw)) + apiKey)
+                .url(API.replace("{{DATES}}", getSearchString(yw)))
                 .build();
 
         final Call call = httpClient.newCall(request);

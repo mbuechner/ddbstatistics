@@ -17,7 +17,7 @@ package de.ddb.dashboard.api;
 
 import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
-import lombok.Getter;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -29,6 +29,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -40,8 +41,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class DZPNumberIssues {
 
-    @Getter
-    private final static String API = "https://api.deutsche-digitale-bibliothek.de/search/index/newspaper-issues/select?q=type:issue&rows=0";
+    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue&rows=0";
+    private final static String API_WITH_ZDB_ID = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue AND zdb_id:{{zdb_id}}&rows=0";
 
     @Autowired
     private OkHttpClient httpClient;
@@ -49,10 +50,18 @@ public class DZPNumberIssues {
     @GetMapping
     @RequestMapping("dzp-number-issues")
     @Cacheable("dzp-number-issues")
-    public Integer restApiCall() throws IOException {
+    public Integer restApiCall(@RequestParam("zdb_id") Optional<String> zdb_id) throws IOException {
+  
+        String queryUrl;
 
+        if (zdb_id.isPresent()) {
+            queryUrl = API_WITH_ZDB_ID.replace("{{zdb_id}}", zdb_id.get());
+        } else {
+            queryUrl = API;
+        }       
+        
         final Request request = new Request.Builder()
-                .url(API)
+                .url(queryUrl)
                 .build();
 
         final Call call = httpClient.newCall(request);

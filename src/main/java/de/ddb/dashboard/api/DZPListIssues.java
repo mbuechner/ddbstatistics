@@ -17,6 +17,10 @@ package de.ddb.dashboard.api;
 
 import com.jayway.jsonpath.JsonPath;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
@@ -39,42 +43,55 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api")
 @Slf4j
-public class DZPNumberNewspapers {
+public class DZPListIssues {
 
-    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper/select?q=hasLoadedIssues:true&rows=0";
-    private final static String API_WITH_ZDB_ID = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper/select?q=hasLoadedIssues:true AND id:{{zdb_id}}&rows=0";
+    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue AND zdb_id:{{zdb_id}}&rows=2147483647&fl=id,publication_date";
 
     @Autowired
     private OkHttpClient httpClient;
 
     @GetMapping
-    @RequestMapping("dzp-number-newspapers")
-    @Cacheable("dzp-number-newspapers")
-    public Integer restApiCall(@RequestParam("zdb_id") Optional<String> zdb_id) throws IOException {
+    @RequestMapping("dzp-list-issues")
+    @Cacheable("dzp-list-issues")
+    public List<Map<String, String>> restApiCall(@RequestParam(value = "zdb_id", required = false) Optional<String> zdb_id) throws IOException {
 
         String queryUrl;
 
-        if (zdb_id.isPresent()) {
-            queryUrl = API_WITH_ZDB_ID.replace("{{zdb_id}}", zdb_id.get());
+        if (zdb_id.isPresent() && !zdb_id.equals("null")) {
+            queryUrl = API.replace("{{zdb_id}}", zdb_id.get());
         } else {
-            queryUrl = API;
-        }       
-        
+            throw new IllegalArgumentException("No ZDB ID given");
+        }
+
         final Request request = new Request.Builder()
                 .url(queryUrl)
                 .build();
-
         final Call call = httpClient.newCall(request);
         final Response response = call.execute();
 
-        final Integer numFound = JsonPath
-                .parse(response.body().string())
-                .read("$.response.numFound");
+        final String responseString = response.body().string();
 
-        return numFound;
+        final List<String> id = JsonPath
+                .parse(responseString)
+                .read("$.response.docs.*.id", List.class);
+
+        final List<String> publication_date = JsonPath
+                .parse(responseString)
+                .read("$.response.docs.*.publication_date", List.class);
+
+        final List<Map<String, String>> resp = new ArrayList<>();
+
+        for (int i = 0; i < id.size(); ++i) {
+            Map<String, String> m = new HashMap<>();
+            m.put("id", id.get(i));
+            m.put("publication_date", publication_date.get(i));
+            resp.add(m);
+        }
+
+        return resp;
     }
 
-    @CacheEvict(value = "dzp-number-newspapers", allEntries = true)
+    @CacheEvict(value = "dzp-list-issues", allEntries = true)
     @Scheduled(fixedRateString = "${ddbstatistics.cachettl}")
     public void emptyCache() {
     }

@@ -23,7 +23,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,10 +39,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class DDBNumberObjectsDigitalisat {
 
-    private final static String API = "https://api.deutsche-digitale-bibliothek.de/search/index/search/select?q=digitalisat:true&rows=0&oauth_consumer_key=";
-
-    @Value("${ddbstatistics.apikey}")
-    private String apiKey;
+    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/search/select?q=digitalisat:true&rows=0";
 
     @Autowired
     private OkHttpClient httpClient;
@@ -54,7 +50,7 @@ public class DDBNumberObjectsDigitalisat {
     public Integer restApiCall() throws IOException {
 
         final Request request = new Request.Builder()
-                .url(API + apiKey)
+                .url(API)
                 .build();
 
         final Call call = httpClient.newCall(request);

@@ -8,7 +8,7 @@
         <meta content="Michael Büchner" name="author">
         <title>DDBstatistics</title>
         <!-- Custom fonts for this template-->
-        <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+        <link th:href="@{webjars/font-awesome/5.15.4/css/all.min.css}" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
         <!-- Custom styles for this template-->
         <link href="css/sb-admin-2.min.css" rel="stylesheet">
@@ -37,23 +37,88 @@
                         <!-- Page Heading -->
                         <h1 class="h3 mb-2 text-gray-800">Zeitungstitel</h1>
                         <p class="mb-4">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. </p>
-                        <!-- DataTales Example -->
+
+                        <!-- Newspaper title -->
+                        <div class="card mb-5">
+                            <div class="card-body">
+                                <form class="w-100 m-0 font-weight-bold text-primary">
+                                    <div class="m-0 form-group">
+                                        <input class="form-control" list="titlesOptions" id="titlesDataList" placeholder="Zeitungstitel...">
+                                        <datalist id="titlesOptions"></datalist>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Content Row -->
+                        <div class="row">
+                            <!-- ZPD Number of Newspapers -->
+                            <div class="col-xl-3 col-md-6 mb-4">
+                                <div class="card border-left-primary shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Zeitungstitel</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="dzp-number-newspapers">
+                                                    <i class="fas fa-circle-notch fa-spin"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-heading fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ZPD Number of Issues -->
+                            <div class="col-xl-3 col-md-6 mb-4">
+                                <div class="card border-left-success shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Zeitungsausgaben</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="dzp-number-issues">
+                                                    <i class="fas fa-circle-notch fa-spin"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-newspaper fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ZPD Number of Pages -->
+                            <div class="col-xl-3 col-md-6 mb-4">
+                                <div class="card border-left-info shadow h-100 py-2">
+                                    <div class="card-body">
+                                        <div class="row no-gutters align-items-center">
+                                            <div class="col mr-2">
+                                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Volltextseiten</div>
+                                                <div class="h5 mb-0 font-weight-bold text-gray-800" id="dzp-number-pages">
+                                                    <i class="fas fa-circle-notch fa-spin"></i>
+                                                </div>
+                                            </div>
+                                            <div class="col-auto">
+                                                <i class="fas fa-file fa-2x text-gray-300"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- DataTable -->
                         <div class="card shadow mb-4">
                             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                <!-- <h6 class="m-0 font-weight-bold text-primary">Zeitungstitel</h6> -->
-                                <ul class="nav nav-tabs card-header-tabs" data-bs-tabs="tabs">
-                                    <li class="nav-item">
-                                        <a class="nav-link active" aria-current="true" data-bs-toggle="tab" href="dzp-title.html">Alle</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" data-bs-toggle="tab" href="dzp-title-ns.html">NS-Disclaimer</a>
-                                    </li>
-                                </ul>
+                                <h6 class="m-0 font-weight-bold text-primary">Liste der Zeitungsausgaben</h6>
                                 <div class="dropdown no-arrow">
                                     <a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" id="exportLinks" role="button">
                                         <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
                                     </a>
                                     <div aria-labelledby="exportLinks" class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+
                                         <div class="dropdown-header">Aktionen</div>
                                         <button class="dropdown-item" id="exportLink-copy">Kopieren</button>
                                         <button class="dropdown-item" id="exportLink-print">Drucken</button>
@@ -64,10 +129,12 @@
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <i class="fas fa-circle-notch fa-spin" id="spinner"></i>
-                                    <table class="table table-bordered d-none" id="dzp-list-titles" width="100%"></table>
+                                    <table class="table table-bordered d-none" id="dzp-list-issues" width="100%"></table>
                                 </div>
                             </div>
                         </div>
+
+
                     </div>
                     <!-- /.container-fluid -->
                 </div>
@@ -82,10 +149,10 @@
             <i class="fas fa-angle-up"></i>
         </a>
         <!-- Bootstrap core JavaScript-->
-        <script src="vendor/jquery/jquery.min.js"></script>
-        <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script th:src="@{webjars/jquery/3.7.1/jquery.min.js}"></script>
+        <script th:src="@{webjars/bootstrap/4.6.2/js/bootstrap.min.js}"></script>
         <!-- Core plugin JavaScript-->
-        <script src="vendor/jquery-easing/jquery.easing.min.js"></script>
+        <script th:src="@{webjars/jquery-easing/1.4.1/jquery.easing.min.js}"></script>
         <!-- Custom scripts for all pages-->
         <script src="js/sb-admin-2.min.js"></script>
         <!-- Page level plugins -->
@@ -94,11 +161,72 @@
         <script src="js/ddb-menu.js"></script>
         <script>
             $(document).ready(function () {
+
+                let searchParams = new URLSearchParams(window.location.search);
+
                 $.getJSON("api/dzp-list-titles",
                         function (data) {
+                            jQuery.each(data, function () {
+                                $('#titlesOptions').append("<option id=\"" + this.id + "\" value=\"" + this.id + ": " + this.title + "\">");
+                            });
+
+                            if (searchParams.has('zdb_id')) {
+                                var value = $('option[id="' + searchParams.get('zdb_id') + '"]').val();
+                                $('#titlesDataList').val(value);
+                            }
+                        });
+
+
+                $.getJSON("api/dzp-number-newspapers?zdb_id=" + searchParams.get('zdb_id'),
+                        function (data) {
+                            $('#dzp-number-newspapers').each(function () {
+                                $(this).prop('Counter', 0).animate({
+                                    Counter: data
+                                }, {
+                                    duration: 1000,
+                                    easing: 'swing',
+                                    step: function (now) {
+                                        $(this).text(Math.ceil(now).toLocaleString());
+                                    }
+                                });
+                            });
+                        });
+
+                $.getJSON("api/dzp-number-issues?zdb_id=" + searchParams.get('zdb_id'),
+                        function (data) {
+                            $('#dzp-number-issues').each(function () {
+                                $(this).prop('Counter', 0).animate({
+                                    Counter: data
+                                }, {
+                                    duration: 1000,
+                                    easing: 'swing',
+                                    step: function (now) {
+                                        $(this).text(Math.ceil(now).toLocaleString());
+                                    }
+                                });
+                            });
+                        });
+
+                $.getJSON("api/dzp-number-pages?zdb_id=" + searchParams.get('zdb_id'),
+                        function (data) {
+                            $('#dzp-number-pages').each(function () {
+                                $(this).prop('Counter', 0).animate({
+                                    Counter: data
+                                }, {
+                                    duration: 1000,
+                                    easing: 'swing',
+                                    step: function (now) {
+                                        $(this).text(Math.ceil(now).toLocaleString());
+                                    }
+                                });
+                            });
+                        });
+
+                $.getJSON("api/dzp-list-issues?zdb_id=" + searchParams.get('zdb_id'),
+                        function (data) {
                             $('#spinner').addClass('d-none');
-                            $('#dzp-list-titles').removeClass('d-none');
-                            $("#dzp-list-titles").DataTable({
+                            $('#dzp-list-issues').removeClass('d-none');
+                            $("#dzp-list-issues").DataTable({
                                 "dom": 'B<"row mb-3"<"col-12 col-md-6 pb-2"l><"col-12 col-md-6 pb-2"f>>rt<"row mb-3"<"col-12 col-md-6 pb-2"i><"col-12 col-md-6 pb-2"p>>',
                                 "buttons": ['copy', 'print', 'excel'],
                                 "processing": true,
@@ -111,17 +239,17 @@
                                 },
                                 "data": data,
                                 "columns": [{
+                                        "data": "publication_date",
+                                        "title": "Datum der Veröffentlichung"
+                                    }, {
                                         "data": "id",
                                         "title": "ZDB-ID",
                                         "render": function (data, type, row, meta) {
                                             if (type === 'display') {
-                                                data = '<a href="https://www.deutsche-digitale-bibliothek.de/newspaper/' + data + '" target="_blank">' + data + '</a>';
+                                                data = '<a href="https://www.deutsche-digitale-bibliothek.de/newspaper/item/' + data + '" target="_blank">' + data + '</a>';
                                             }
                                             return data;
                                         }
-                                    }, {
-                                        "data": "title",
-                                        "title": "Zeitungstitel"
                                     }],
                                 "columnDefs": [{
                                         "width": "20%",
@@ -144,6 +272,23 @@
                                 }
                             });
                         });
-            });</script>
+
+                $('#titlesDataList').on('input', function () {
+                    var val = $(this).val();
+                    if ($('#titlesOptions option').filter(function () {
+                        return $(this).val().toUpperCase() === val.toUpperCase();
+                    }).length) {
+                        var zdb_id = $('option[value="' + val + '"]').attr('id');
+                        var url = window.location.href.split('?')[0];
+                        location.href = url + "?zdb_id=" + zdb_id;
+                    }
+                });
+
+                $('input:text').focus(
+                        function () {
+                            $(this).val('');
+                        });
+            });
+        </script>
     </body>
 </html>

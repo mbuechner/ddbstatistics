@@ -35,22 +35,25 @@
                     <!-- Begin Page Content -->
                     <div class="container-fluid">
                         <!-- Page Heading -->
-                        <h1 class="h3 mb-2 text-gray-800">Letzte Updates</h1>
+                        <h1 class="h3 mb-2 text-gray-800">Zeitungstitel</h1>
                         <p class="mb-4">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. </p>
-                        <!-- DataTable -->
+                        <!-- DataTales Example -->
                         <div class="card shadow mb-4">
                             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                                <form class="m-0 font-weight-bold text-primary">
-                                    <div class="m-0 form-group">
-                                        <input type="week" class="form-control" id="woche">
-                                    </div>
-                                </form>
+                                <!-- <h6 class="m-0 font-weight-bold text-primary">Zeitungstitel</h6> -->
+                                <ul class="nav nav-tabs card-header-tabs" data-bs-tabs="tabs">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" aria-current="true" data-bs-toggle="tab" href="dzp-titles.html">Alle</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" data-bs-toggle="tab" href="dzp-titles-ns.html">NS-Disclaimer</a>
+                                    </li>
+                                </ul>
                                 <div class="dropdown no-arrow">
                                     <a aria-expanded="false" aria-haspopup="true" class="dropdown-toggle" data-toggle="dropdown" href="#" id="exportLinks" role="button">
                                         <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
                                     </a>
                                     <div aria-labelledby="exportLinks" class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
-
                                         <div class="dropdown-header">Aktionen</div>
                                         <button class="dropdown-item" id="exportLink-copy">Kopieren</button>
                                         <button class="dropdown-item" id="exportLink-print">Drucken</button>
@@ -61,7 +64,7 @@
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <i class="fas fa-circle-notch fa-spin" id="spinner"></i>
-                                    <table class="table table-bordered d-none" id="ddb-ingests" width="100%"></table>
+                                    <table class="table table-bordered d-none" id="dzp-list-titles" width="100%"></table>
                                 </div>
                             </div>
                         </div>
@@ -87,23 +90,15 @@
         <script src="js/sb-admin-2.min.js"></script>
         <!-- Page level plugins -->
         <script src="vendor/datatables/datatables.min.js"></script>
-        <!-- Time Handling in JS -->
-        <script th:src="@{webjars/momentjs/2.29.4/moment.js}"></script>
         <!-- Page level custom scripts -->
         <script src="js/ddb-menu.js"></script>
         <script>
             $(document).ready(function () {
-                let searchParams = new URLSearchParams(window.location.search);
-                if (searchParams.has('cw')) {
-                    $('#woche').val(searchParams.get('cw'));
-                } else {
-                    $('#woche').val(moment().weekYear() + "-W" + moment().week()).trigger("input");
-                }
-                $.getJSON("api/ddb-list-ingests?cw=" + $('#woche').val(),
+                $.getJSON("api/dzp-list-titles",
                         function (data) {
                             $('#spinner').addClass('d-none');
-                            $('#ddb-ingests').removeClass('d-none');
-                            $("#ddb-ingests").DataTable({
+                            $('#dzp-list-titles').removeClass('d-none');
+                            $("#dzp-list-titles").DataTable({
                                 "dom": 'B<"row mb-3"<"col-12 col-md-6 pb-2"l><"col-12 col-md-6 pb-2"f>>rt<"row mb-3"<"col-12 col-md-6 pb-2"i><"col-12 col-md-6 pb-2"p>>',
                                 "buttons": ['copy', 'print', 'excel'],
                                 "processing": true,
@@ -116,32 +111,24 @@
                                 },
                                 "data": data,
                                 "columns": [{
-                                        "data": "ingest_id",
-                                        "title": "Ingest ID",
+                                        "data": "id",
+                                        "title": "ZDB-ID",
                                         "render": function (data, type, row, meta) {
                                             if (type === 'display') {
-                                                data = '<a href="https://www.deutsche-digitale-bibliothek.de/searchresults?query=dataset_id%3A' + data + '" target="_blank">' + data + '</a>';
+                                                data = '<a href="https://www.deutsche-digitale-bibliothek.de/newspaper/' + data + '" target="_blank">' + data + '</a>';
                                             }
                                             return data;
                                         }
                                     }, {
-                                        "data": "dataset_label",
-                                        "title": "Dataset"
+                                        "data": "title",
+                                        "title": "Zeitungstitel"
+                                    }],
+                                "columnDefs": [{
+                                        "width": "20%",
+                                        "targets": 0
                                     }, {
-                                        "data": "provider_fct",
-                                        "title": "Datenpartner"
-                                    }, {
-                                        "data": "md_format",
-                                        "title": "Metadatenformat"
-                                    }, {
-                                        "data": "numFound",
-                                        "title": "Objektanzahl"
-                                    }, {
-                                        "data": "type_fct",
-                                        "title": "Medientyp"
-                                    }, {
-                                        "data": "sector_fct",
-                                        "title": "Kultursparte"
+                                        "width": "80%",
+                                        "targets": 1
                                     }],
                                 initComplete: function () {
                                     $('.dt-buttons').addClass('d-none');
@@ -157,12 +144,6 @@
                                 }
                             });
                         });
-                $('#woche').on('input', function (e) {
-                    var url = window.location.href.split('?')[0];
-                    var week = $('#woche').val();
-                    location.href = url + "?cw=" + week;
-                });
-            });
-        </script>
+            });</script>
     </body>
 </html>

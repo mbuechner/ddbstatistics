@@ -26,7 +26,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -43,10 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class DDBPiechartMediatype {
 
-    private final static String API = "https://api.deutsche-digitale-bibliothek.de/search/index/search/select?q=*:*&rows=0&facet=on&facet.field=type_fct&facet.mincount=1&facet.limit=-1&oauth_consumer_key=";
-
-    @Value("${ddbstatistics.apikey}")
-    private String apiKey;
+    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/search/select?q=*:*&rows=0&facet=on&facet.field=type_fct&facet.mincount=1&facet.limit=-1";
 
     private final static Map<String, String> CCD = new HashMap<>() {
         {
@@ -71,7 +67,7 @@ public class DDBPiechartMediatype {
     public Map<String, Integer> restApiCall() throws IOException {
 
         final Request request = new Request.Builder()
-                .url(API + apiKey)
+                .url(API)
                 .build();
 
         final Call call = httpClient.newCall(request);
