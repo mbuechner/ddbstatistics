@@ -51,7 +51,7 @@ public class DZPListTitlesNs {
     @GetMapping
     @RequestMapping("dzp-list-titles-ns")
     @Cacheable("dzp-list-titles-ns")
-    public List<Map<String, String>> restApiCall() throws IOException {
+    public List<Map<String, Object>> restApiCall() throws IOException {
 
         final Request request = new Request.Builder()
                 .url(API)
@@ -62,20 +62,25 @@ public class DZPListTitlesNs {
 
         final String responseString = response.body().string();
 
-        final List<String> zdbIds = JsonPath
+        final List<String> zdb_id = JsonPath
                 .parse(responseString)
                 .read("$.grouped.zdb_id.groups[*].groupValue", List.class);
 
-        final List<String> titles = JsonPath
+        final List<String> paper_title = JsonPath
                 .parse(responseString)
                 .read("$.grouped.zdb_id.groups[*].doclist.docs[0].paper_title", List.class);
 
-        final List<Map<String, String>> resp = new ArrayList<>();
+        final List<Integer> numFound = JsonPath
+                .parse(responseString)
+                .read("$.grouped.zdb_id.groups[*].doclist.numFound", List.class);
 
-        for (int i = 0; i < zdbIds.size(); ++i) {
-            Map<String, String> m = new HashMap<>();
-            m.put("id", zdbIds.get(i));
-            m.put("title", titles.get(i));
+        final List<Map<String, Object>> resp = new ArrayList<>();
+
+        for (int i = 0; i < zdb_id.size(); ++i) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("zdb_id", zdb_id.get(i));
+            m.put("paper_title", paper_title.get(i));
+            m.put("numFound", numFound.get(i));
             resp.add(m);
         }
 

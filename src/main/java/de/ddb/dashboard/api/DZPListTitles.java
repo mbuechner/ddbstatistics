@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class DZPListTitles {
 
-    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper/select?q=hasLoadedIssues:true&rows=2147483647&fl=id,title";
+    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue&rows=-1&fl=paper_title&group=true&group.field=zdb_id&group.limit=1";
 
     @Autowired
     private OkHttpClient httpClient;
@@ -51,7 +51,7 @@ public class DZPListTitles {
     @GetMapping
     @RequestMapping("dzp-list-titles")
     @Cacheable("dzp-list-titles")
-    public List<Map<String, String>> restApiCall() throws IOException {
+    public List<Map<String, Object>> restApiCall() throws IOException {
 
         final Request request = new Request.Builder()
                 .url(API)
@@ -62,39 +62,33 @@ public class DZPListTitles {
 
         final String responseString = response.body().string();
 
-        final List<String> zdbIds = JsonPath
+        final List<String> zdb_id = JsonPath
                 .parse(responseString)
-                .read("$.response.docs.*.id", List.class);
+                .read("$.grouped.zdb_id.groups[*].groupValue", List.class);
 
-        final List<List<String>> titles = JsonPath
+        final List<String> paper_title = JsonPath
                 .parse(responseString)
-                .read("$.response.docs.*.title", List.class);
+                .read("$.grouped.zdb_id.groups[*].doclist.docs[0].paper_title", List.class);
 
-        final List<Map<String, String>> resp = new ArrayList<>();
+        final List<Integer> numFound = JsonPath
+                .parse(responseString)
+                .read("$.grouped.zdb_id.groups[*].doclist.numFound", List.class);
 
-        for (int i = 0; i < zdbIds.size(); ++i) {
-            Map<String, String> m = new HashMap<>();
-            m.put("id", zdbIds.get(i));
-            m.put("title", listToString(titles.get(i), "; "));
+        final List<Map<String, Object>> resp = new ArrayList<>();
+
+        for (int i = 0; i < zdb_id.size(); ++i) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("zdb_id", zdb_id.get(i));
+            m.put("paper_title", paper_title.get(i));
+            m.put("numFound", numFound.get(i));
             resp.add(m);
         }
 
         return resp;
     }
 
-    public static String listToString(List<String> list, String separator) {
-        final StringBuilder sb = new StringBuilder();
-        for (String s : list) {
-            sb.append(s);
-            sb.append(separator);
-        }
-        sb.delete(sb.length() - separator.length(), sb.length());
-        return sb.toString();
-    }
-
     @CacheEvict(value = "dzp-list-titles", allEntries = true)
     @Scheduled(fixedRateString = "${ddbstatistics.cachettl}")
     public void emptyCache() {
     }
-
 }

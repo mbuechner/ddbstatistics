@@ -167,7 +167,7 @@
                 $.getJSON("api/dzp-list-titles",
                         function (data) {
                             jQuery.each(data, function () {
-                                $('#titlesOptions').append("<option id=\"" + this.id + "\" value=\"" + this.id + ": " + this.title + "\">");
+                                $('#titlesOptions').append("<option id=\"" + this.zdb_id + "\" value=\"" + this.zdb_id + ": " + this.paper_title + "\">");
                             });
 
                             if (searchParams.has('zdb_id')) {

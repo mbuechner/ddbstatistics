@@ -110,7 +110,7 @@
                                 },
                                 "data": data,
                                 "columns": [{
-                                        "data": "id",
+                                        "data": "zdb_id",
                                         "title": "ZDB-ID",
                                         "render": function (data, type, row, meta) {
                                             if (type === 'display') {
@@ -119,14 +119,20 @@
                                             return data;
                                         }
                                     }, {
-                                        "data": "title",
+                                        "data": "paper_title",
                                         "title": "Zeitungstitel"
+                                    },{
+                                        "data": "numFound",
+                                        "title": "Anzahl der Ausgaben"
                                     }],
                                 "columnDefs": [{
                                         "width": "20%",
                                         "targets": 0
                                     }, {
-                                        "width": "80%",
+                                        "width": "60%",
+                                        "targets": 1
+                                    }, {
+                                        "width": "20%",
                                         "targets": 1
                                     }],
                                 initComplete: function () {
