@@ -24,17 +24,19 @@ $(document).ready(function () {
         }
     });
 
-    $.getJSON("api/ddb-piechart-mediatype",
-            function (data) {
-                keys = [];
-                values = [];
-                for (var property in data) {
-                    keys.push(property);
-                    values.push(data[property]);
+    $.ajax({
+        url: "api/ddb-piechart-mediatype",
+        timeout: 0
+    }).done(function (data) {
+        keys = [];
+        values = [];
+        for (var property in data) {
+            keys.push(property);
+            values.push(data[property]);
 
-                }
-                ddbPiechartMediatype.data.labels = keys;
-                ddbPiechartMediatype.data.datasets[0].data = values;
-                ddbPiechartMediatype.update();
-            });
+        }
+        ddbPiechartMediatype.data.labels = keys;
+        ddbPiechartMediatype.data.datasets[0].data = values;
+        ddbPiechartMediatype.update();
+    });
 });

@@ -163,131 +163,149 @@
         <script src="js/ddb-menu.js"></script>
         <!-- Select2 library -->
         <script th:src="@{webjars/select2/4.0.13/js/select2.min.js}"></script>
+        <script th:src="@{webjars/select2/4.0.13/js/i18n/de.js}"></script>
         <script>
             $(document).ready(function () {
 
                 let searchParams = new URLSearchParams(window.location.search);
 
-                $.getJSON("api/dzp-list-titles",
-                        function (data) {
-                            var newData = $.map(data, function (obj) {
-                                obj.id = obj.zdb_id;
-                                obj.text = obj.zdb_id + ": " + obj.paper_title;
-                                if (searchParams.has('zdb_id') && obj.zdb_id === searchParams.get('zdb_id')) {
-                                    obj.selected = true;
+                $.ajax({
+                    url: "api/dzp-list-titles",
+                    timeout: 0
+                }).done(function (data) {
+                    var newData = $.map(data, function (obj) {
+                        obj.id = obj.zdb_id;
+                        obj.text = obj.zdb_id + ": " + obj.paper_title;
+                        if (searchParams.has('zdb_id') && obj.zdb_id === searchParams.get('zdb_id')) {
+                            obj.selected = true;
+                        }
+                        return obj;
+                    });
+
+                    $("#titlesSelect").select2({
+                        data: $.merge([{id: '', text: ''}], newData),
+                        language: "de",
+                        allowClear: true,
+                        placeholder: "Suche"
+                    });
+
+                    $("#titlesSelect").select2("val", null);
+
+                    $("#titlesSelect").removeAttr('disabled');
+                });
+
+                $.ajax({
+                    url: "api/dzp-number-newspapers?zdb_id=" + searchParams.get('zdb_id'),
+                    timeout: 0
+                }).done(function (data) {
+                    $('#dzp-number-newspapers').each(function () {
+                        $(this).prop('Counter', 0).animate({
+                            Counter: data
+                        }, {
+                            duration: 1000,
+                            easing: 'swing',
+                            step: function (now) {
+                                $(this).text(Math.ceil(now).toLocaleString());
+                            }
+                        });
+                    });
+                });
+
+                $.ajax({
+                    url: "api/dzp-number-issues?zdb_id=" + searchParams.get('zdb_id'),
+                    timeout: 0
+                }).done(function (data) {
+                    $('#dzp-number-issues').each(function () {
+                        $(this).prop('Counter', 0).animate({
+                            Counter: data
+                        }, {
+                            duration: 1000,
+                            easing: 'swing',
+                            step: function (now) {
+                                $(this).text(Math.ceil(now).toLocaleString());
+                            }
+                        });
+                    });
+                });
+
+                $.ajax({
+                    url: "api/dzp-number-pages?zdb_id=" + searchParams.get('zdb_id'),
+                    timeout: 0
+                }).done(function (data) {
+                    $('#dzp-number-pages').each(function () {
+                        $(this).prop('Counter', 0).animate({
+                            Counter: data
+                        }, {
+                            duration: 1000,
+                            easing: 'swing',
+                            step: function (now) {
+                                $(this).text(Math.ceil(now).toLocaleString());
+                            }
+                        });
+                    });
+                });
+
+                $.ajax({
+                    url: "api/dzp-list-issues?zdb_id=" + searchParams.get('zdb_id'),
+                    timeout: 0
+                }).done(function (data) {
+                    $('#spinner').addClass('d-none');
+                    $('#dzp-list-issues').removeClass('d-none');
+                    $("#dzp-list-issues").DataTable({
+                        "dom": 'B<"row mb-3"<"col-12 col-md-6 pb-2"l><"col-12 col-md-6 pb-2"f>>rt<"row mb-3"<"col-12 col-md-6 pb-2"i><"col-12 col-md-6 pb-2"p>>',
+                        "buttons": ['copy', 'print', 'excel'],
+                        "processing": true,
+                        "pageLength": 10,
+                        "fixedHeader": true,
+                        "lengthMenu": [Array(10, 100, 500, 1000, 5000, -1), Array(10, 100, 500, 1000, 5000, "Alle")],
+                        "language": {
+                            url: "vendor/datatables/de-DE.json",
+                            // decimal: ","
+                        },
+                        "data": data,
+                        "columns": [{
+                                "data": "publication_date",
+                                "title": "Datum der Veröffentlichung"
+                            }, {
+                                "data": "id",
+                                "title": "ZDB-ID",
+                                "render": function (data, type, row, meta) {
+                                    if (type === 'display') {
+                                        data = '<a href="https://www.deutsche-digitale-bibliothek.de/newspaper/item/' + data + '" target="_blank">' + data + '</a>';
+                                    }
+                                    return data;
                                 }
-                                return obj;
+                            }],
+                        "columnDefs": [{
+                                "width": "20%",
+                                "targets": 0
+                            }, {
+                                "width": "80%",
+                                "targets": 1
+                            }],
+                        initComplete: function () {
+                            $('.dt-buttons').addClass('d-none');
+                            $('#exportLink-copy').click(function () {
+                                $('.buttons-copy').click();
                             });
-
-                            $("#titlesSelect").select2({
-                                data: newData,
-                                language: "de"
+                            $('#exportLink-print').click(function () {
+                                $('.buttons-print').click();
                             });
-
-                            $("#titlesSelect").removeAttr('disabled');
-                        });
-
-
-                $.getJSON("api/dzp-number-newspapers?zdb_id=" + searchParams.get('zdb_id'),
-                        function (data) {
-                            $('#dzp-number-newspapers').each(function () {
-                                $(this).prop('Counter', 0).animate({
-                                    Counter: data
-                                }, {
-                                    duration: 1000,
-                                    easing: 'swing',
-                                    step: function (now) {
-                                        $(this).text(Math.ceil(now).toLocaleString());
-                                    }
-                                });
+                            $('#exportLink-excel').click(function () {
+                                $('.buttons-excel').click();
                             });
-                        });
-
-                $.getJSON("api/dzp-number-issues?zdb_id=" + searchParams.get('zdb_id'),
-                        function (data) {
-                            $('#dzp-number-issues').each(function () {
-                                $(this).prop('Counter', 0).animate({
-                                    Counter: data
-                                }, {
-                                    duration: 1000,
-                                    easing: 'swing',
-                                    step: function (now) {
-                                        $(this).text(Math.ceil(now).toLocaleString());
-                                    }
-                                });
-                            });
-                        });
-
-                $.getJSON("api/dzp-number-pages?zdb_id=" + searchParams.get('zdb_id'),
-                        function (data) {
-                            $('#dzp-number-pages').each(function () {
-                                $(this).prop('Counter', 0).animate({
-                                    Counter: data
-                                }, {
-                                    duration: 1000,
-                                    easing: 'swing',
-                                    step: function (now) {
-                                        $(this).text(Math.ceil(now).toLocaleString());
-                                    }
-                                });
-                            });
-                        });
-
-                $.getJSON("api/dzp-list-issues?zdb_id=" + searchParams.get('zdb_id'),
-                        function (data) {
-                            $('#spinner').addClass('d-none');
-                            $('#dzp-list-issues').removeClass('d-none');
-                            $("#dzp-list-issues").DataTable({
-                                "dom": 'B<"row mb-3"<"col-12 col-md-6 pb-2"l><"col-12 col-md-6 pb-2"f>>rt<"row mb-3"<"col-12 col-md-6 pb-2"i><"col-12 col-md-6 pb-2"p>>',
-                                "buttons": ['copy', 'print', 'excel'],
-                                "processing": true,
-                                "pageLength": 10,
-                                "fixedHeader": true,
-                                "lengthMenu": [Array(10, 100, 500, 1000, 5000, -1), Array(10, 100, 500, 1000, 5000, "Alle")],
-                                "language": {
-                                    url: "vendor/datatables/de-DE.json",
-                                    // decimal: ","
-                                },
-                                "data": data,
-                                "columns": [{
-                                        "data": "publication_date",
-                                        "title": "Datum der Veröffentlichung"
-                                    }, {
-                                        "data": "id",
-                                        "title": "ZDB-ID",
-                                        "render": function (data, type, row, meta) {
-                                            if (type === 'display') {
-                                                data = '<a href="https://www.deutsche-digitale-bibliothek.de/newspaper/item/' + data + '" target="_blank">' + data + '</a>';
-                                            }
-                                            return data;
-                                        }
-                                    }],
-                                "columnDefs": [{
-                                        "width": "20%",
-                                        "targets": 0
-                                    }, {
-                                        "width": "80%",
-                                        "targets": 1
-                                    }],
-                                initComplete: function () {
-                                    $('.dt-buttons').addClass('d-none');
-                                    $('#exportLink-copy').click(function () {
-                                        $('.buttons-copy').click();
-                                    });
-                                    $('#exportLink-print').click(function () {
-                                        $('.buttons-print').click();
-                                    });
-                                    $('#exportLink-excel').click(function () {
-                                        $('.buttons-excel').click();
-                                    });
-                                }
-                            });
-                        });
+                        }
+                    });
+                });
 
                 $('#titlesSelect').change(function () {
                     var zdb_id = $(this).val();
                     var url = window.location.href.split('?')[0];
-                    location.href = url + "?zdb_id=" + zdb_id;
+                    if (zdb_id !== null && zdb_id !== '') {
+                        location.href = url + "?zdb_id=" + zdb_id;
+                    } else if (zdb_id !== null && zdb_id === '') {
+                        location.href = url;
+                    }
                 });
             });
         </script>
