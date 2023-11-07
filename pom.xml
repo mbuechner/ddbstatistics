@@ -125,8 +125,8 @@
         </dependency>
         <dependency>
             <groupId>org.webjars</groupId>
-            <artifactId>datatables</artifactId>
-            <version>1.13.5</version>
+            <artifactId>select2</artifactId>
+            <version>4.0.13</version>
         </dependency>
     </dependencies>
 

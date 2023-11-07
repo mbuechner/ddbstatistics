@@ -14,6 +14,9 @@
         <link href="css/sb-admin-2.min.css" rel="stylesheet">
         <!-- Custom styles for this page -->
         <link href="vendor/datatables/datatables.min.css" rel="stylesheet">
+        <!-- Select2 library -->
+        <link th:href="@{webjars/select2/4.0.13/css/select2.min.css}" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
     </head>
     <body id="page-top">
         <!-- Page Wrapper -->
@@ -41,10 +44,9 @@
                         <!-- Newspaper title -->
                         <div class="card mb-5">
                             <div class="card-body">
-                                <form class="w-100 m-0 font-weight-bold text-primary">
+                                <form class="w-100 m-0">
                                     <div class="m-0 form-group">
-                                        <input class="form-control" list="titlesOptions" id="titlesDataList" placeholder="Zeitungstitel...">
-                                        <datalist id="titlesOptions"></datalist>
+                                        <select class="form-control" id="titlesSelect" name="titlesSelect" disabled></select>
                                     </div>
                                 </form>
                             </div>
@@ -159,6 +161,8 @@
         <script src="vendor/datatables/datatables.min.js"></script>
         <!-- Page level custom scripts -->
         <script src="js/ddb-menu.js"></script>
+        <!-- Select2 library -->
+        <script th:src="@{webjars/select2/4.0.13/js/select2.min.js}"></script>
         <script>
             $(document).ready(function () {
 
@@ -166,14 +170,21 @@
 
                 $.getJSON("api/dzp-list-titles",
                         function (data) {
-                            jQuery.each(data, function () {
-                                $('#titlesOptions').append("<option id=\"" + this.zdb_id + "\" value=\"" + this.zdb_id + ": " + this.paper_title + "\">");
+                            var newData = $.map(data, function (obj) {
+                                obj.id = obj.zdb_id;
+                                obj.text = obj.zdb_id + ": " + obj.paper_title;
+                                if (searchParams.has('zdb_id') && obj.zdb_id === searchParams.get('zdb_id')) {
+                                    obj.selected = true;
+                                }
+                                return obj;
                             });
 
-                            if (searchParams.has('zdb_id')) {
-                                var value = $('option[id="' + searchParams.get('zdb_id') + '"]').val();
-                                $('#titlesDataList').val(value);
-                            }
+                            $("#titlesSelect").select2({
+                                data: newData,
+                                language: "de"
+                            });
+
+                            $("#titlesSelect").removeAttr('disabled');
                         });
 
 
@@ -273,21 +284,11 @@
                             });
                         });
 
-                $('#titlesDataList').on('input', function () {
-                    var val = $(this).val();
-                    if ($('#titlesOptions option').filter(function () {
-                        return $(this).val().toUpperCase() === val.toUpperCase();
-                    }).length) {
-                        var zdb_id = $('option[value="' + val + '"]').attr('id');
-                        var url = window.location.href.split('?')[0];
-                        location.href = url + "?zdb_id=" + zdb_id;
-                    }
+                $('#titlesSelect').change(function () {
+                    var zdb_id = $(this).val();
+                    var url = window.location.href.split('?')[0];
+                    location.href = url + "?zdb_id=" + zdb_id;
                 });
-
-                $('input:text').focus(
-                        function () {
-                            $(this).val('');
-                        });
             });
         </script>
     </body>
