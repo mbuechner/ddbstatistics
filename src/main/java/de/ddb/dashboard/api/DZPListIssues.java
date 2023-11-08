@@ -57,7 +57,7 @@ public class DZPListIssues {
 
         String queryUrl;
 
-        if (zdb_id.isPresent() && !zdb_id.equals("null")) {
+        if (zdb_id.isPresent() && !zdb_id.get().equals("null")) {
             queryUrl = API.replace("{{zdb_id}}", zdb_id.get());
         } else {
             throw new IllegalArgumentException("No ZDB ID given");

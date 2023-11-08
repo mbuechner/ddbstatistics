@@ -14,6 +14,8 @@
         <link href="css/sb-admin-2.min.css" rel="stylesheet">
         <!-- Custom styles for this page -->
         <link href="vendor/datatables/datatables.min.css" rel="stylesheet">
+        <!-- Select2 library -->
+        <link th:href="@{webjars/select2/4.0.13/css/select2.min.css}" rel="stylesheet">
     </head>
     <body id="page-top">
         <!-- Page Wrapper -->
@@ -37,7 +39,17 @@
                         <!-- Page Heading -->
                         <h1 class="h3 mb-2 text-gray-800">Zeitungstitel</h1>
                         <p class="mb-4">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. </p>
-                        <!-- DataTales Example -->
+                        <!-- Newspaper title -->
+                        <div class="card mb-5">
+                            <div class="card-body">
+                                <form class="w-100 m-0">
+                                    <div class="m-0 form-group">
+                                        <select class="form-control" id="providerSelect" name="providerSelect" disabled></select>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- DataTable -->
                         <div class="card shadow mb-4">
                             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
                                 <!-- <h6 class="m-0 font-weight-bold text-primary">Zeitungstitel</h6> -->
@@ -92,11 +104,55 @@
         <script src="vendor/datatables/datatables.min.js"></script>
         <!-- Page level custom scripts -->
         <script src="js/ddb-menu.js"></script>
+        <!-- Select2 library -->
+        <script th:src="@{webjars/select2/4.0.13/js/select2.min.js}"></script>
+        <script th:src="@{webjars/select2/4.0.13/js/i18n/de.js}"></script>
         <script>
             $(document).ready(function () {
+
+                let searchParams = new URLSearchParams(window.location.search);
+
                 $.ajax({
-                    url: "api/dzp-list-titles",
-                    timeout: 0
+                    url: "api/dzp-list-providers",
+                    timeout: 0,
+                    dataType: "json"
+                }).done(function (data) {
+                    var newData = $.map(data, function (obj) {
+                        obj.id = obj.provider_ddb_id;
+                        obj.text = obj.provider_ddb_id + ": " + obj.provider;
+                        if (searchParams.has('provider_ddb_id') && obj.provider_ddb_id === searchParams.get('provider_ddb_id')) {
+                            obj.selected = true;
+                        }
+                        return obj;
+                    });
+
+                    $("#providerSelect").select2({
+                        data: $.merge([{id: '', text: ''}], newData),
+                        language: "de",
+                        width: "100%",
+                        allowClear: true,
+                        placeholder: "Suche"
+                    });
+
+                    $("#providerSelect").select2("val", null);
+
+                    $("#providerSelect").removeAttr('disabled');
+                });
+
+                $('#providerSelect').change(function () {
+                    var zdb_id = $(this).val();
+                    var url = window.location.href.split('?')[0];
+                    if (zdb_id !== null && zdb_id !== '') {
+                        location.href = url + "?provider_ddb_id=" + zdb_id;
+                    } else if (zdb_id !== null && zdb_id === '') {
+                        location.href = url;
+                    }
+                });
+
+                $.ajax({
+                    url: searchParams.has('provider_ddb_id') ? "api/dzp-list-titles?provider_ddb_id=" + searchParams.get('provider_ddb_id') : "api/dzp-list-titles",
+                    timeout: 0,
+                    dataType: "json"
                 }).done(function (data) {
                     $('#spinner').addClass('d-none');
                     $('#dzp-list-titles').removeClass('d-none');

@@ -26,7 +26,8 @@ $(document).ready(function () {
 
     $.ajax({
         url: "api/ddb-piechart-mediatype",
-        timeout: 0
+        timeout: 0,
+        dataType: "json"
     }).done(function (data) {
         keys = [];
         values = [];

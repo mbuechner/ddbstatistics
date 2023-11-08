@@ -26,7 +26,8 @@ $(document).ready(function () {
 
     $.ajax({
         url: "api/ddb-piechart-sector-digitalisat",
-        timeout: 0
+        timeout: 0,
+        dataType: "json"
     }).done(function (data) {
         keys = [];
         values = [];

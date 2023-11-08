@@ -1,7 +1,8 @@
 $(document).ready(function () {
     $.ajax({
         url: "api/dzp-number-pages",
-        timeout: 0
+        timeout: 0,
+        dataType: "json"
     }).done(function (data) {
         $('#dzp-number-pages').each(function () {
             $(this).prop('Counter', 0).animate({

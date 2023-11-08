@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -32,6 +33,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -44,6 +46,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DZPListTitlesNs {
 
     private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue%20AND%20ns_disclaimer_required:true&rows=-1&fl=paper_title&group=true&group.field=zdb_id&group.limit=1";
+    private final static String API_WITH_PROVIDER_DDB_ID = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue AND provider_ddb_id:{{provider_ddb_id}} AND ns_disclaimer_required:true&rows=-1&fl=paper_title&group=true&group.field=zdb_id&group.limit=1";
 
     @Autowired
     private OkHttpClient httpClient;
@@ -51,10 +54,18 @@ public class DZPListTitlesNs {
     @GetMapping
     @RequestMapping("dzp-list-titles-ns")
     @Cacheable("dzp-list-titles-ns")
-    public List<Map<String, Object>> restApiCall() throws IOException {
+    public List<Map<String, Object>> restApiCall(@RequestParam("provider_ddb_id") Optional<String> provider_ddb_id) throws IOException {
+
+        String queryUrl;
+
+        if (provider_ddb_id.isPresent()) {
+            queryUrl = API_WITH_PROVIDER_DDB_ID.replace("{{provider_ddb_id}}", provider_ddb_id.get());
+        } else {
+            queryUrl = API;
+        }
 
         final Request request = new Request.Builder()
-                .url(API)
+                .url(queryUrl)
                 .build();
 
         final Call call = httpClient.newCall(request);

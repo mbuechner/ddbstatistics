@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
@@ -33,7 +32,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -43,29 +41,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("api")
 @Slf4j
-public class DZPListTitles {
+public class DZPListProviders {
 
-    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue&rows=-1&fl=paper_title&group=true&group.field=zdb_id&group.limit=1";
-    private final static String API_WITH_PROVIDER_DDB_ID = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue AND provider_ddb_id:{{provider_ddb_id}}&rows=-1&fl=paper_title&group=true&group.field=zdb_id&group.limit=1";
+    private final static String API = "https://api.deutsche-digitale-bibliothek.de/2/search/index/newspaper-issues/select?q=type:issue&rows=-1&fl=provider&group=true&group.field=provider_ddb_id&group.limit=1";
 
     @Autowired
     private OkHttpClient httpClient;
 
     @GetMapping
-    @RequestMapping("dzp-list-titles")
-    @Cacheable("dzp-list-titles")
-    public List<Map<String, Object>> restApiCall(@RequestParam("provider_ddb_id") Optional<String> provider_ddb_id) throws IOException {
-
-        String queryUrl;
-
-        if (provider_ddb_id.isPresent()) {
-            queryUrl = API_WITH_PROVIDER_DDB_ID.replace("{{provider_ddb_id}}", provider_ddb_id.get());
-        } else {
-            queryUrl = API;
-        }
+    @RequestMapping("dzp-list-providers")
+    @Cacheable("dzp-list-providers")
+    public List<Map<String, Object>> restApiCall() throws IOException {
 
         final Request request = new Request.Builder()
-                .url(queryUrl)
+                .url(API)
                 .build();
 
         final Call call = httpClient.newCall(request);
@@ -73,24 +62,24 @@ public class DZPListTitles {
 
         final String responseString = response.body().string();
 
-        final List<String> zdb_id = JsonPath
+        final List<String> provider_ddb_id = JsonPath
                 .parse(responseString)
-                .read("$.grouped.zdb_id.groups[*].groupValue", List.class);
+                .read("$.grouped.provider_ddb_id.groups[*].groupValue", List.class);
 
-        final List<String> paper_title = JsonPath
+        final List<String> provider = JsonPath
                 .parse(responseString)
-                .read("$.grouped.zdb_id.groups[*].doclist.docs[0].paper_title", List.class);
+                .read("$.grouped.provider_ddb_id.groups[*].doclist.docs[0].provider", List.class);
 
         final List<Integer> numFound = JsonPath
                 .parse(responseString)
-                .read("$.grouped.zdb_id.groups[*].doclist.numFound", List.class);
+                .read("$.grouped.provider_ddb_id.groups[*].doclist.numFound", List.class);
 
         final List<Map<String, Object>> resp = new ArrayList<>();
 
-        for (int i = 0; i < zdb_id.size(); ++i) {
+        for (int i = 0; i < provider_ddb_id.size(); ++i) {
             Map<String, Object> m = new HashMap<>();
-            m.put("zdb_id", zdb_id.get(i));
-            m.put("paper_title", paper_title.get(i));
+            m.put("provider_ddb_id", provider_ddb_id.get(i));
+            m.put("provider", provider.get(i));
             m.put("numFound", numFound.get(i));
             resp.add(m);
         }
@@ -98,7 +87,7 @@ public class DZPListTitles {
         return resp;
     }
 
-    @CacheEvict(value = "dzp-list-titles", allEntries = true)
+    @CacheEvict(value = "dzp-list-providers", allEntries = true)
     @Scheduled(fixedRateString = "${ddbstatistics.cachettl}")
     public void emptyCache() {
     }

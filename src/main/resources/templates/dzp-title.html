@@ -16,7 +16,6 @@
         <link href="vendor/datatables/datatables.min.css" rel="stylesheet">
         <!-- Select2 library -->
         <link th:href="@{webjars/select2/4.0.13/css/select2.min.css}" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css">
     </head>
     <body id="page-top">
         <!-- Page Wrapper -->
@@ -40,7 +39,6 @@
                         <!-- Page Heading -->
                         <h1 class="h3 mb-2 text-gray-800">Zeitungstitel</h1>
                         <p class="mb-4">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. </p>
-
                         <!-- Newspaper title -->
                         <div class="card mb-5">
                             <div class="card-body">
@@ -51,7 +49,6 @@
                                 </form>
                             </div>
                         </div>
-
                         <!-- Content Row -->
                         <div class="row">
                             <!-- ZPD Number of Newspapers -->
@@ -171,7 +168,8 @@
 
                 $.ajax({
                     url: "api/dzp-list-titles",
-                    timeout: 0
+                    timeout: 0,
+                    dataType: "json"
                 }).done(function (data) {
                     var newData = $.map(data, function (obj) {
                         obj.id = obj.zdb_id;
@@ -185,6 +183,7 @@
                     $("#titlesSelect").select2({
                         data: $.merge([{id: '', text: ''}], newData),
                         language: "de",
+                        width: "100%",
                         allowClear: true,
                         placeholder: "Suche"
                     });
@@ -194,9 +193,20 @@
                     $("#titlesSelect").removeAttr('disabled');
                 });
 
+                $('#titlesSelect').change(function () {
+                    var zdb_id = $(this).val();
+                    var url = window.location.href.split('?')[0];
+                    if (zdb_id !== null && zdb_id !== '') {
+                        location.href = url + "?zdb_id=" + zdb_id;
+                    } else if (zdb_id !== null && zdb_id === '') {
+                        location.href = url;
+                    }
+                });
+
                 $.ajax({
-                    url: "api/dzp-number-newspapers?zdb_id=" + searchParams.get('zdb_id'),
-                    timeout: 0
+                    url: searchParams.has('zdb_id') ? "api/dzp-number-newspapers?zdb_id=" + searchParams.get('zdb_id') : "api/dzp-number-newspapers",
+                    timeout: 0,
+                    dataType: "json"
                 }).done(function (data) {
                     $('#dzp-number-newspapers').each(function () {
                         $(this).prop('Counter', 0).animate({
@@ -212,8 +222,9 @@
                 });
 
                 $.ajax({
-                    url: "api/dzp-number-issues?zdb_id=" + searchParams.get('zdb_id'),
-                    timeout: 0
+                    url: searchParams.has('zdb_id') ? "api/dzp-number-issues?zdb_id=" + searchParams.get('zdb_id') : "api/dzp-number-issues",
+                    timeout: 0,
+                    dataType: "json"
                 }).done(function (data) {
                     $('#dzp-number-issues').each(function () {
                         $(this).prop('Counter', 0).animate({
@@ -229,8 +240,9 @@
                 });
 
                 $.ajax({
-                    url: "api/dzp-number-pages?zdb_id=" + searchParams.get('zdb_id'),
-                    timeout: 0
+                    url: searchParams.has('zdb_id') ? "api/dzp-number-pages?zdb_id=" + searchParams.get('zdb_id') : "api/dzp-number-pages",
+                    timeout: 0,
+                    dataType: "json"
                 }).done(function (data) {
                     $('#dzp-number-pages').each(function () {
                         $(this).prop('Counter', 0).animate({
@@ -246,8 +258,9 @@
                 });
 
                 $.ajax({
-                    url: "api/dzp-list-issues?zdb_id=" + searchParams.get('zdb_id'),
-                    timeout: 0
+                    url: searchParams.has('zdb_id') ? "api/dzp-list-issues?zdb_id=" + searchParams.get('zdb_id') : "api/dzp-list-issues",
+                    timeout: 0,
+                    dataType: "json"
                 }).done(function (data) {
                     $('#spinner').addClass('d-none');
                     $('#dzp-list-issues').removeClass('d-none');
@@ -296,16 +309,6 @@
                             });
                         }
                     });
-                });
-
-                $('#titlesSelect').change(function () {
-                    var zdb_id = $(this).val();
-                    var url = window.location.href.split('?')[0];
-                    if (zdb_id !== null && zdb_id !== '') {
-                        location.href = url + "?zdb_id=" + zdb_id;
-                    } else if (zdb_id !== null && zdb_id === '') {
-                        location.href = url;
-                    }
                 });
             });
         </script>

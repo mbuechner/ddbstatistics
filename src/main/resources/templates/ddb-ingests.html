@@ -101,7 +101,8 @@
                 }
                 $.ajax({
                     url: "api/ddb-list-ingests?cw=" + $('#woche').val(),
-                    timeout: 0
+                    timeout: 0,
+                    dataType: "json"
                 }).done(function (data) {
                     $('#spinner').addClass('d-none');
                     $('#ddb-ingests').removeClass('d-none');
